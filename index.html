@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Care Hero Assistant</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #FDF8F4;
+      font-size: 18px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .main-title {
+      font-size: 40px;
+      color: #333;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    .tagline {
+      color: #333;
+      font-size: 22px;
+      margin-bottom: 30px;
+    }
+    #chat { 
+      height: 400px; 
+      overflow-y: auto; 
+      border: 1px solid #FFB366;
+      border-radius: 20px;
+      padding: 25px;
+      background-color: white;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(255, 140, 26, 0.1);
+      font-size: 18px;
+      display: flex;
+      flex-direction: column;
+    }
+    .message-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 15px 0;
+      animation: slideUp 0.3s ease-out;
+      opacity: 1;
+    }
+    .message { 
+      line-height: 1.6;
+      padding: 12px 20px;
+      border-radius: 15px;
+      max-width: 70%;
+      font-size: 18px;
+      word-wrap: break-word;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .user-container { 
+      flex-direction: row-reverse;
+    }
+    .user { 
+      color: #FF8C1A;
+      background-color: #FFE5CC;
+      margin-left: auto;
+    }
+    .user-avatar {
+      background-color: #FF8C1A;
+      color: white;
+    }
+    .assistant { 
+      color: #333;
+      background-color: #FDF8F4;
+      margin-right: auto;
+    }
+    .assistant-avatar {
+      background-color: #666;
+      color: white;
+    }
+    #userInput {
+      padding: 15px;
+      border: 1px solid #FFB366;
+      border-radius: 15px;
+      width: 80%;
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    button {
+      padding: 15px 30px;
+      background-color: #FF8C1A;
+      color: white;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    button:hover {
+      background-color: #FF7400;
+      transform: translateY(-1px);
+      transition: all 0.2s ease;
+    }
+    .chat-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="header">
+      <h1 class="main-title">Home Care Assessment Assistant</h1>
+      <div class="tagline">Easier, Safer, and Personalized Care</div>
+    </div>
+    <div id="chat"></div>
+    <div style="display: flex; gap: 10px;">
+      <input type="text" id="userInput" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+
+    function displayWelcomeMessage() {
+      const welcomeMessage = "Hello! Welcome to Care Hero. I'm here to assist you in understanding whether home care might be helpful for yourself or a loved one. May I ask who you're filling this out for — yourself or someone else?";
+      chat.innerHTML = `
+        <div class="message-container">
+          <div class="avatar assistant-avatar">CH</div>
+          <div class="message assistant">${welcomeMessage}</div>
+        </div>`;
+    }
+
+    window.onload = displayWelcomeMessage;
+
+    document.getElementById('userInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const userMessage = input.value;
+      if (!userMessage.trim()) return;
+      
+      input.value = '';
+      chat.innerHTML += `
+        <div class="message-container user-container">
+          <div class="avatar user-avatar">You</div>
+          <div class="message user">${userMessage}</div>
+        </div>`;
+      
+      chat.scrollTop = chat.scrollHeight;
+
+      try {
+        // Create a thread if it doesn't exist
+        if (!window.threadId) {
+          const threadResponse = await fetch("https://api.openai.com/v1/threads", {
+            method: "POST",
+            headers: {
+              "OpenAI-Beta": "assistants=v2",
+              "Content-Type": "application/json",
+              "Authorization": "Bearer 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"
+            }
+          });
+          const threadData = await threadResponse.json();
+          window.threadId = threadData.id;
+        }
+
+        // Add message and run assistant
+        await fetch(`https://api.openai.com/v1/threads/${window.threadId}/messages`, {
+          method: "POST",
+          headers: {
+            "OpenAI-Beta": "assistants=v2",
+            "Content-Type": "application/json",
+            "Authorization": "Bearer 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"
+          },
+          body: JSON.stringify({
+            role: "user",
+            content: userMessage
+          })
+        });
+
+        // Run the assistant with your specific assistant ID
+        const runResponse = await fetch(`https://api.openai.com/v1/threads/${window.threadId}/runs`, {
+          method: "POST",
+          headers: {
+            "OpenAI-Beta": "assistants=v2",
+            "Content-Type": "application/json",
+            "Authorization": "Bearer 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"
+          },
+          body: JSON.stringify({
+            assistant_id: "asst_zI90Zj3iuNm8nGj7FqhNHHyI"  // Your specific assistant ID
+          })
+        });
+        const runData = await runResponse.json();
+
+        // Poll for completion
+        let run;
+        do {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between checks
+          const statusResponse = await fetch(`https://api.openai.com/v1/threads/${window.threadId}/runs/${runData.id}`, {
+            headers: {
+              "OpenAI-Beta": "assistants=v2",
+              "Authorization": "Bearer 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"
+            }
+          });
+          run = await statusResponse.json();
+        } while (run.status === "in_progress" || run.status === "queued");
+
+        // Get the assistant's response
+        const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${window.threadId}/messages`, {
+          headers: {
+            "OpenAI-Beta": "assistants=v2",
+            "Authorization": "Bearer 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"
+          }
+        });
+        const messages = await messagesResponse.json();
+        const assistantReply = messages.data[0].content[0].text.value;
+
+        // Display the assistant's response
+        chat.innerHTML += `
+          <div class="message-container">
+            <div class="avatar assistant-avatar">CH</div>
+            <div class="message assistant">${assistantReply}</div>
+          </div>`;
+        
+        // Scroll to bottom after assistant reply
+        chat.scrollTop = chat.scrollHeight;
+
+      } catch (error) {
+        console.error('Error:', error);
+        chat.innerHTML += `
+          <div class="message-container">
+            <div class="avatar assistant-avatar">CH</div>
+            <div class="message assistant">Sorry, there was an error processing your request.</div>
+          </div>`;
+      }
+    }
+  </script>
+</body>
+</html>
+
