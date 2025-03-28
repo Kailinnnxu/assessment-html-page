@@ -180,7 +180,7 @@
             headers: {
               "OpenAI-Beta": "assistants=v2",
               "Content-Type": "application/json",
-              "Authorization": "Bearer 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"
+              "Authorization": "Bearer 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"
             }
           });
           const threadData = await threadResponse.json();
@@ -193,7 +193,7 @@
           headers: {
             "OpenAI-Beta": "assistants=v2",
             "Content-Type": "application/json",
-            "Authorization": "Bearer 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"
+            "Authorization": "Bearer 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"
           },
           body: JSON.stringify({
             role: "user",
@@ -207,7 +207,7 @@
           headers: {
             "OpenAI-Beta": "assistants=v2",
             "Content-Type": "application/json",
-            "Authorization": "Bearer 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"
+            "Authorization": "Bearer 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"
           },
           body: JSON.stringify({
             assistant_id: "asst_zI90Zj3iuNm8nGj7FqhNHHyI"  // Your specific assistant ID
@@ -222,7 +222,7 @@
           const statusResponse = await fetch(`https://api.openai.com/v1/threads/${window.threadId}/runs/${runData.id}`, {
             headers: {
               "OpenAI-Beta": "assistants=v2",
-              "Authorization": "Bearer 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"
+              "Authorization": "Bearer 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"
             }
           });
           run = await statusResponse.json();
@@ -232,7 +232,7 @@
         const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${window.threadId}/messages`, {
           headers: {
             "OpenAI-Beta": "assistants=v2",
-            "Authorization": "Bearer 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"
+            "Authorization": "Bearer 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"
           }
         });
         const messages = await messagesResponse.json();
